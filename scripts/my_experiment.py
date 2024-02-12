@@ -12,6 +12,8 @@ BLACK = 'black'
 RED = 'red'
 TOY_TYPES = [GREEN, BLUE, BLACK, RED]
 
+knapsackFull = False
+
 # skills_server node global launcher
 process = None
 node = roslaunch.core.Node("task3_env", "skills_server.py", name="skills_server_node")
@@ -31,9 +33,12 @@ def call_navigate(location):
 
 
 def call_pick(toy_type):
+    global knapsackFull
     try:
         pick_srv = rospy.ServiceProxy('pick', pick)
         resp = pick_srv(toy_type)
+        if resp.success:
+            knapsackFull = True
         print(f"Picking {toy_type} (accurate): {resp.success}")
         return resp.success
     except rospy.ServiceException as e:
@@ -41,9 +46,12 @@ def call_pick(toy_type):
 
 
 def call_place():
+    global knapsackFull
     try:
         place_srv = rospy.ServiceProxy('place', place)
         resp = place_srv()
+        if resp.success:
+            knapsackFull = False
         print(f"Placing (accurate): {resp.success}")
         return resp.success
     except rospy.ServiceException as e:
@@ -80,6 +88,8 @@ def relaunch_skills_server():
 
 
 def reset_env():
+    global knapsackFull
+
     print(f"========== reset env =========")
     # make sure the navigation is running
     relaunch_skills_server()
@@ -91,19 +101,22 @@ def reset_env():
 
     # spawn toys and reset counters
     relaunch_skills_server()
+    knapsackFull = False
 
 
 # todo: move implementation to control script
 def run_control():
+    global knapsackFull
+
     # navigate to location 0
     navigation_success = call_navigate(0)
     while not navigation_success:
         navigation_success = call_navigate(0)
     
-    # pick the toy
+    # pick the toy (try all types)
     for toy_type in TOY_TYPES:
-        pick_success = call_pick(toy_type)
-        if pick_success:
+        call_pick(toy_type)
+        if knapsackFull:
             break
     
     # navigate to location 4 (baby)
@@ -112,7 +125,7 @@ def run_control():
         navigation_success = call_navigate(4)
     
     # place the toy
-    if pick_success and navigation_success:
+    if knapsackFull and navigation_success:
         call_place()
 
 

@@ -5,6 +5,12 @@ import roslaunch
 import os
 from task3_env.srv import *
 
+# toy_type options
+GREEN = 'green'
+BLUE = 'blue'
+BLACK = 'black'
+RED = 'red'
+TOY_TYPES = [GREEN, BLUE, BLACK, RED]
 
 # skills_server node global launcher
 process = None
@@ -13,11 +19,32 @@ launch = roslaunch.scriptapi.ROSLaunch()
 launch.start()
 
 
-def call_navigate(x):
-    print(f"navigating to: {x}")
+def call_navigate(location):
+    print(f"Navigating to: {location}")
     try:
         navigate_srv = rospy.ServiceProxy('navigate', navigate)
-        resp = navigate_srv(x)
+        resp = navigate_srv(location)
+        print(f"Navigation success (allegedly): {resp.success}")
+        return resp.success
+    except rospy.ServiceException as e:
+        print("Service call failed: %s"%e)
+
+
+def call_pick(toy_type):
+    try:
+        pick_srv = rospy.ServiceProxy('pick', pick)
+        resp = pick_srv(toy_type)
+        print(f"Picking {toy_type} (accurate): {resp.success}")
+        return resp.success
+    except rospy.ServiceException as e:
+        print("Service call failed: %s"%e)
+
+
+def call_place():
+    try:
+        place_srv = rospy.ServiceProxy('place', place)
+        resp = place_srv()
+        print(f"Placing (accurate): {resp.success}")
         return resp.success
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
@@ -65,10 +92,28 @@ def reset_env():
     # spawn toys and reset counters
     relaunch_skills_server()
 
+
 # todo: move implementation to control script
 def run_control():
+    # navigate to location 0
     navigation_success = call_navigate(0)
-    print(f"Navigation success: {navigation_success}")
+    while not navigation_success:
+        navigation_success = call_navigate(0)
+    
+    # pick the toy
+    for toy_type in TOY_TYPES:
+        pick_success = call_pick(toy_type)
+        if pick_success:
+            break
+    
+    # navigate to location 4 (baby)
+    navigation_success = call_navigate(4)
+    while not navigation_success:
+        navigation_success = call_navigate(4)
+    
+    # place the toy
+    if pick_success and navigation_success:
+        call_place()
 
 
 def print_infos(infos):

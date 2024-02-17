@@ -10,7 +10,7 @@ y: ['green','blue','black','red']
 
 ROS:
 roslaunch task3_env task3_env.launch
-rosrun task3_env my_experiment.py
+script -c 'rosrun task3_env my_experiment.py' shell.txt
 
 Linux:
 chmod -R +x .

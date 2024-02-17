@@ -24,7 +24,7 @@ knapsack_toy = None
 
 # skills_server node global launcher
 process = None
-node = roslaunch.core.Node("task3_env", "skills_server.py", name="skills_server_node")
+node = roslaunch.core.Node("task3_env", "skills_server.py", name="skills_server_node", output='screen')
 launch = roslaunch.scriptapi.ROSLaunch()
 launch.start()
 
@@ -193,17 +193,22 @@ def print_infos(infos):
 
 def main():
     infos = []
+    total_rewards = []
     for i in range(10):
         reset_env()
         print("\n\n===============================")
         print(f"========== CONTROL {i+1} =========")
         print("===============================")
         run_control()
-        infos.append(call_info())
-        print(f"========== Finished {i+1} =========\n\n")
+        info = call_info()
+        infos.append(info)
+        total_reward = int(info.split("total rewards:")[1])
+        total_rewards.append(total_reward)
+        print(f"Total reward: {total_reward}")
+        print(f"========== Finished {i+1}, Total reward: {total_reward} =========\n\n")
     
     print_infos(infos)
-    # todo print(sum(total_rewards) / len(total_rewards))
+    print(f"Average reward: {sum(total_rewards) / len(total_rewards)}")
 
 
 # todo: launch task3_env from here instead of cli

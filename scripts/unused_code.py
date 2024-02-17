@@ -30,3 +30,26 @@ def launch():
 
     # return launch
 
+
+def run_control_first():
+    global knapsack_toy
+
+    # navigate to location 0
+    navigation_success = call_navigate(0)
+    while not navigation_success:
+        navigation_success = call_navigate(0)
+    
+    # pick the toy (try all types)
+    for toy_type in TOY_TYPES:
+        call_pick(toy_type)
+        if knapsack_toy:
+            break
+    
+    # navigate to location 4 (baby)
+    navigation_success = call_navigate(4)
+    navigation_success = call_navigate(4)
+    
+    # place the toy
+    if knapsack_toy and navigation_success:
+        call_place()
+

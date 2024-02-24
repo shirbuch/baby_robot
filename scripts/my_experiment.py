@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from numpy import average
 import rospy
 import roslaunch
 import os
@@ -180,6 +181,9 @@ def run_control():
         
         next_location = calc_next_location(next_locations)
 
+    info = call_info()
+    return info
+
 
 ################################
 def print_infos(infos):
@@ -191,24 +195,35 @@ def print_infos(infos):
         print(info)
     print("===============================")
 
+# todo validate file path
+def export_infos(infos, average_reward):
+    with open('task3_env/experiment_output.txt', 'w') as f:
+        for i, info in enumerate(infos):
+            f.write(f"=== Info for expirament {i}:\n{info}\n\n")
+        f.write(f"=== Average reward: {average_reward}\n\n\n")
+
 def main():
     infos = []
     total_rewards = []
-    for i in range(10):
+    for i in range(1):
         reset_env()
         print("\n\n===============================")
         print(f"========== CONTROL {i+1} =========")
         print("===============================")
-        run_control()
-        info = call_info()
+        info = run_control()
+
         infos.append(info)
         total_reward = int(info.split("total rewards:")[1])
         total_rewards.append(total_reward)
         print(f"Total reward: {total_reward}")
+        
         print(f"========== Finished {i+1}, Total reward: {total_reward} =========\n\n")
     
     print_infos(infos)
-    print(f"Average reward: {sum(total_rewards) / len(total_rewards)}")
+    average_reward = sum(total_rewards) / len(total_rewards)
+    print(f"Average reward: {average_reward}")
+
+    export_infos(infos, average_reward)
 
 
 # todo: launch task3_env from here instead of cli

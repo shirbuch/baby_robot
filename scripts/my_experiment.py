@@ -90,7 +90,7 @@ def print_infos(infos):
 
 # todo validate file path
 def export_infos(infos, average_reward):
-    with open('task3_env/experiment_output.txt', 'w') as f:
+    with open('experiment_output.txt', 'w') as f:
         for i, info in enumerate(infos):
             f.write(f"=== Info for expirament {i}:\n{info}\n\n")
         f.write(f"=== Average reward: {average_reward}\n\n\n")
@@ -98,7 +98,7 @@ def export_infos(infos, average_reward):
 def main():
     infos = []
     total_rewards = []
-    for i in range(3):
+    for i in range(10):
         reset_env()
 
         print("\n\n===============================")

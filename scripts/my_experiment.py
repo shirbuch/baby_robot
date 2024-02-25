@@ -13,6 +13,8 @@ skills_server_node = roslaunch.core.Node("task3_env", "skills_server.py", name="
 control_process = None
 control_node = roslaunch.core.Node("task3_env", "my_control.py", name="control_node", output='screen')
 
+# launch.parent.ROSLaunchParent(UUID, filename)
+
 launch = roslaunch.scriptapi.ROSLaunch()
 launch.start()
 
@@ -62,8 +64,11 @@ def reset_env():
 
     # start at the baby
     if not call_navigate(4):
+        rospy.sleep(3)  
+
         # make sure it did not fail
         call_navigate(4)
+        rospy.sleep(3)
 
     # spawn toys and reset counters
     relaunch_skills_server()
